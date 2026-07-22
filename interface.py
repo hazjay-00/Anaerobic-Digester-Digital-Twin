@@ -231,4 +231,4 @@ report_data = pd.DataFrame({
 
 st.dataframe(report_data, hide_index=True, use_container_width=True)
 
-st.download_button(label="Export Current Plant Metrics to Shift CSV Report", data=report_data.to_csv(index=False), file_name="digital_twin_shift_report.csv", mime="text/csv", use_container_width=True)
+st.download_button(label="Export Current Plant Metrics to Shift CSV Report", data=report_data.to_csv(index=False), file_name="ad_twin_shift_report.csv", mime="text/csv", use_container_width=True)
