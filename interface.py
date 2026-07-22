@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import pickle
 from simulation_engine import run_plant_simulation
 
-st.set_page_config(page_title="Hybrid Digital Twin", layout="wide")
+st.set_page_config(page_title="Anaerobic Digester Digital Twin", layout="wide")
 
 # --- EMERGENCY KILL SWITCH ---
 if "kill_switch" not in st.session_state:
@@ -19,8 +19,8 @@ if st.session_state.kill_switch:
     st.info("To restore plant operations, clear site faults and toggle the Kill Switch button again.")
     st.stop()
 
-st.title("Hybrid Physics-ML Anaerobic Bioreactor Digital Twin")
-st.caption("Monod Kinetics & Haldane Thermal Inherent Models")
+st.title("Anaerobic Digester Digital Twin")
+st.caption("Hybrid Monod-Haldane Kinetics & Empirical Effluent Modeling")
 st.markdown("---")
 
 # Load saved Day 2 AI Brain safely
@@ -202,7 +202,7 @@ with col_right:
 st.markdown("---")
 
 # --- EXPANDABLE METHODOLOGY SECTION---
-with st.expander("View Academic Architecture & Mathematical Methodology"):
+with st.expander("View Architecture & Mathematical Methodology"):
     st.markdown("""
     ### Hybrid Digital Twin Structural Logic
     This application utilizes a **hybrid modeling paradigm** to overcome the limitations of purely data-driven or purely mechanistic architectures:
