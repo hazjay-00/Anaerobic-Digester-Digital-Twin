@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import pickle
+import os  # Added to check file system state
 from simulation_engine import run_plant_simulation
 
 st.set_page_config(page_title="Anaerobic Digester Digital Twin", layout="wide")
@@ -23,6 +24,11 @@ st.title("Anaerobic Digester Digital Twin")
 st.caption("Hybrid Monod-Haldane Kinetics & Empirical Effluent Modeling")
 st.markdown("---")
 
+# --- AUTO-TRAIN CHECK FOR STREAMLIT CLOUD ---
+if not os.path.exists("twin_brain_cod.pkl"):
+    st.info("Generating Monte Carlo dataset and training AI Brain model for first-time setup...")
+    import ml_agent
+
 # Load saved Day 2 AI Brain safely
 @st.cache_resource
 def load_ai_brain():
@@ -30,7 +36,7 @@ def load_ai_brain():
         return pickle.load(f)
 
 try:
-    # Unpacking the new dictionary payload cleanly
+    # Unpacking the dictionary payload cleanly
     artifacts = load_ai_brain()
     ai_engine = artifacts["model"]
     biogas_model_accuracy = artifacts["r2_score"]
@@ -44,6 +50,7 @@ except TypeError:
 
 if "optimized_mode" not in st.session_state:
     st.session_state.optimized_mode = False
+
 # --- SIDEBAR CONTROL DIALS ---
 st.sidebar.header("Plant Actuator Valve Knobs")
 
@@ -54,11 +61,11 @@ if st.sidebar.button("Run AI Profit Optimization Engine", use_container_width=Tr
 if st.session_state.optimized_mode:
     st.sidebar.info("AI Automation Active: Knobs locked to peak performance baseline coordinates.")
     slider_cod = st.sidebar.slider("Incoming Waste Concentration (COD mg/L)", 150, 800, 550, disabled=True)
-    slider_hrt = st.sidebar.slider("Hydraulic Retention Time (HRT days)", 3.3, 20.0, 9.1, step=0.1, disabled=True) # 1 / 0.11 dilution
+    slider_hrt = st.sidebar.slider("Hydraulic Retention Time (HRT days)", 3.3, 20.0, 9.1, step=0.1, disabled=True)
     slider_temp = st.sidebar.slider("Digester Thermal Core Temperature (°C)", 20, 60, 38, disabled=True)
 else:
     slider_cod = st.sidebar.slider("Incoming Waste Concentration (COD mg/L)", 150, 800, 450)
-    slider_hrt = st.sidebar.slider("Hydraulic Retention Time (HRT days)", 3.3, 20.0, 6.7, step=0.1) # Default 1 / 0.15 dilution = 6.66 days
+    slider_hrt = st.sidebar.slider("Hydraulic Retention Time (HRT days)", 3.3, 20.0, 6.7, step=0.1)
     slider_temp = st.sidebar.slider("Digester Thermal Core Temperature (°C)", 20, 60, 37)
 
 # Convert HRT back to dilution rate for background calculations
@@ -79,29 +86,14 @@ if slider_temp < 30:
     heating_cost_per_day = 15.50  
     net_profit_per_day = -heating_cost_per_day
 else:
-    # 1. Take the tiny lab methane value (e.g., 95.43 Liters)
     lab_methane_liters = methane_final
-    
-    # 2. Scale it up by 500 to represent a real industrial facility
     industrial_methane_liters = lab_methane_liters * 500.0  
-    
-    # 3. Convert Liters to Normal Cubic Meters (Nm3) by dividing by 1,000
     methane_nm3 = industrial_methane_liters / 1000.0  
-    
-    # 4. Calculate Money ($1.50 earned per Nm3 of gas)
     revenue_per_day = methane_nm3 * 1.50 
-    
-    # 5. Calculate Heating Utility Costs
     heating_cost_per_day = max(0.0, (slider_temp - 15.0) * 0.45)
-    
-    # 6. Calculate final Net Profit
     net_profit_per_day = revenue_per_day - heating_cost_per_day
 
 # Process Wastewater Purification Efficiency KPI
-cod_removal_efficiency = ((slider_cod - predicted_effluent_cod) / slider_cod) * 100
-cod_removal_efficiency = max(0.0, min(100.0, cod_removal_efficiency))
-
-# KPI 1: COD Purification Efficiency
 cod_removal_efficiency = ((slider_cod - predicted_effluent_cod) / slider_cod) * 100
 cod_removal_efficiency = max(0.0, min(100.0, cod_removal_efficiency))
 
@@ -152,7 +144,6 @@ with col3:
         delta_color="inverse" if predicted_effluent_cod > 130 else "normal"
     )
 with col4:
-    # This displays the actual computed validation score.
     st.metric(
         label="ML Brain Accuracy (R² Score)", 
         value=f"{biogas_model_accuracy:.2f} %", 
@@ -225,7 +216,7 @@ report_data = pd.DataFrame({
     "Thermal Core Core Temp (C)": [slider_temp],
     "Methane Yield (Nm3/day)": [f"{methane_nm3:.4f}"],
     "Purification Efficiency (%)": [f"{cod_removal_efficiency:.1f}%"],
-    "Thermodynamic Efficiency (%)": [f"{thermodynamic_efficiency:.1f}%"],
+    "Thermodynamic Efficiency (%)": [f"${thermodynamic_efficiency:.1f}%"],
     "Net Operating Profit ($/day)": [f"${net_profit_per_day:.2f}"]
 })
 
