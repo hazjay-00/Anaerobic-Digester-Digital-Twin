@@ -129,49 +129,46 @@ with col1:
         label="Biogas Volumetric Yield",
         value=f"{methane_nm3:.1f} Nm³/day",
         delta="Target: >20.0 Nm³/day" if col1_ok else "Low Yield (<20)",
-        delta_color="normal" if col1_ok else "inverse"
+        delta_color="off"
     )
 
 with col2:
     if x_final < 40.0:
-        d_lbl, d_clr = "Washout Danger (<40)", "inverse"
+        d_lbl = "Washout Danger (<40)"
     elif x_final > 200.0:
-        d_lbl, d_clr = "High Density (>200)", "inverse"
+        d_lbl = "High Density (>200)"
     else:
-        d_lbl, d_clr = "Safe: 40-200 mg/L", "normal"
+        d_lbl = "Safe: 40-200 mg/L"
 
     st.metric(
         label="Active Biomass Density",
         value=f"{x_final:.1f} mg/L",
         delta=d_lbl,
-        delta_color=d_clr
+        delta_color="off"
     )
 
 with col3:
-    col3_ok = predicted_effluent_cod <= 130.0
     st.metric(
         label="Outgoing Pollution (COD)",
         value=f"{predicted_effluent_cod:.1f} mg/L",
-        delta="Limit: <130 mg/L" if col3_ok else "Non-Compliant (>130)",
-        delta_color="normal" if col3_ok else "inverse"
+        delta="Limit: <130 mg/L" if predicted_effluent_cod <= 130.0 else "Non-Compliant (>130)",
+        delta_color="off"
     )
     
 with col4:
-    col4_ok = biogas_model_accuracy >= 90.0
     st.metric(
         label="ML Brain Accuracy (R²)",
         value=f"{biogas_model_accuracy:.1f}%",
-        delta="Benchmark: >90%" if col4_ok else "Low Accuracy (<90%)",
-        delta_color="normal" if col4_ok else "inverse"
+        delta="Benchmark: >90%" if biogas_model_accuracy >= 90.0 else "Low Accuracy (<90%)",
+        delta_color="off"
     )
 
 with col5:
-    col5_ok = thermodynamic_efficiency >= 50.0
     st.metric(
         label="Thermodynamic Yield",
         value=f"{thermodynamic_efficiency:.1f}%",
-        delta="Benchmark: ≥50%" if col5_ok else "Sub-optimal (<50%)",
-        delta_color="normal" if col5_ok else "inverse"
+        delta="Benchmark: ≥50%" if thermodynamic_efficiency >= 50.0 else "Sub-optimal (<50%)",
+        delta_color="off"
     )
     
 # --- RISK ANALYSIS & GRAPHICAL LAYOUT ---
