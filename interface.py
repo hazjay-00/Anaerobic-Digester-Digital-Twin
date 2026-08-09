@@ -122,10 +122,17 @@ with fin_col2:
     st.markdown(status_badge("Budget Max: $10.00/day" if ok_spend else "Over Budget (>$10)", ok_spend), unsafe_allow_html=True)
 
 with fin_col3:
-    ok_profit = net_profit_per_day > 0.0
+    target_profit = 20.0  # Daily profit target threshold in dollars
+    ok_profit = net_profit_per_day >= target_profit
     st.metric(label="Net Operational Margin", value=f"${net_profit_per_day:,.2f} / day")
-    st.markdown(status_badge("Status: Profitable" if ok_profit else "Status: OPERATIONAL LOSS", ok_profit), unsafe_allow_html=True)
-
+    st.markdown(
+        status_badge(
+            "Target: >$20.00/day" if ok_profit else "Low Margin (<$20)", 
+            ok_profit
+        ), 
+        unsafe_allow_html=True
+    )
+    
 st.markdown("---")
 
 # --- TECHNICAL METRICS & KPIs ROW ---
