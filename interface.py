@@ -125,36 +125,40 @@ col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
     st.metric(
-        label="Biogas Volumetric Yield", 
-        value=f"{methane_nm3:.1f} Nm³/day", 
-        delta="Industrial Standard: Nm³"
+        label="Biogas Volumetric Yield",
+        value=f"{methane_nm3:.1f} Nm³/day",
+        delta="Std: Nm³"
     )
+
 with col2:
     st.metric(
-        label="Active Biomass Density", 
+        label="Active Biomass Density",
         value=f"{x_final:.1f} mg/L",
-        delta="Safe Range: 40 - 200 mg/L",
+        delta="Safe: 40-200 mg/L",
         delta_color="normal" if x_final >= 40 else "inverse"
     )
+
 with col3:
     st.metric(
-        label="Outgoing Pollution (Effluent COD)", 
+        label="Outgoing Pollution (COD)",
         value=f"{predicted_effluent_cod:.1f} mg/L",
-        delta=f"Removal: {cod_removal_efficiency:.1f}% (Limit: <130 mg/L)",
+        delta=f"Removal: {cod_removal_efficiency:.1f}%",
         delta_color="inverse" if predicted_effluent_cod > 130 else "normal"
     )
+
 with col4:
     st.metric(
-        label="ML Brain Accuracy (R² Score)", 
-        value=f"{biogas_model_accuracy:.1f} %", 
-        delta="Cross-Validated (80/20 Train/Test Split)", 
+        label="ML Brain Accuracy (R²)",
+        value=f"{biogas_model_accuracy:.1f}%",
+        delta="80/20 Split",
         delta_color="normal"
     )
+
 with col5:
     st.metric(
-        label="Thermodynamic Yield Efficiency",
-        value=f"{thermodynamic_efficiency:.1f} %",
-        delta="Max Limit: 100% (0.35 Nm³/kg COD)"
+        label="Thermodynamic Yield",
+        value=f"{thermodynamic_efficiency:.1f}%",
+        delta="Max: 100%"
     )
     
 # --- RISK ANALYSIS & GRAPHICAL LAYOUT ---
