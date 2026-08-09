@@ -73,31 +73,31 @@ else:
 # Convert HRT back to dilution rate for background calculations
 dilution_rate_calc = 1.0 / slider_hrt
 
-# --- READ REAL-TIME PHYSICS SIMULATION ---
+# --- READ REAL-TIME PHYSICS SIMULATION & ML BRAIN ---
 s_final, x_final, methane_final = run_plant_simulation(slider_cod, dilution_rate_calc, slider_temp)
 
-# --- READ MACHINE LEARNING COMPONENT ---
-input_array = pd.DataFrame([[slider_cod, dilution_rate_calc, slider_temp]], columns=['Inflow_COD', 'Dilution_Rate', 'Temperature'])
+input_array = pd.DataFrame([[slider_cod, dilution_rate_calc, slider_temp]], 
+                           columns=['Inflow_COD', 'Dilution_Rate', 'Temperature'])
 predicted_effluent_cod = ai_engine.predict(input_array)[0]
 
-# --- PURE KINETIC & SYNTHETIC DATA CALCULATIONS ---
+# --- UNLIMITED RAW DATASET CALCULATIONS ---
+# Raw Methane Yield from ODE kinetics (Liters/day)
 methane_liters = methane_final
-methane_nm3 = methane_liters / 1000.0  # Defines methane_nm3 to fix the NameError
+methane_nm3 = methane_liters / 1000.0  # Normalized to Nm³
 
-# Calculate actual COD removed (mg/L)
-cod_removed = max(0.001, slider_cod - predicted_effluent_cod)
+# COD Removal Mass (kg/m³)
+cod_removed_mg_l = slider_cod - predicted_effluent_cod
+cod_removed_kg_m3 = max(0.0001, cod_removed_mg_l / 1000.0)
 
-# Thermodynamic Yield calculation using organic inputs
-cod_removed_kg = cod_removed / 1000.0
-if slider_temp >= 30 and cod_removed_kg > 0:
-    actual_yield_coefficient = methane_nm3 / cod_removed_kg
-    thermodynamic_efficiency = (actual_yield_coefficient / 0.35) * 100
-    thermodynamic_efficiency = max(0.0, min(100.0, thermodynamic_efficiency))
-else:
-    thermodynamic_efficiency = 0.0
+# Uncapped Specific Methane Yield (Nm³ CH4 / kg COD removed)
+actual_yield_coefficient = methane_nm3 / cod_removed_kg_m3
 
-# Financial Metrics
-revenue_per_day = methane_liters * 0.003
+# Uncapped Thermodynamic Yield relative to STP theoretical maximum (0.35 Nm³/kg COD)
+# Pure model output with NO min(100.0, ...) or temp thresholds
+thermodynamic_efficiency = (actual_yield_coefficient / 0.35) * 100.0
+
+# Dynamic Financial Metrics based directly on raw methane yield
+revenue_per_day = methane_liters * 0.30  # Adjusted unit price for bench/pilot scale
 heating_cost_per_day = max(0.0, (slider_temp - 15.0) * 0.45)
 net_profit_per_day = revenue_per_day - heating_cost_per_day
 
@@ -174,13 +174,12 @@ with col4:
     st.markdown(status_badge("Benchmark: >90%" if ok4 else "Low Accuracy (<90%)", ok4), unsafe_allow_html=True)
 
 with col5:
-    ok5 = thermodynamic_efficiency >= 50.0
     st.metric(
-    label="Thermodynamic Yield",
-    value=f"{thermodynamic_efficiency:.1f}%",
-    help="Percentage of theoretical maximum methane conversion (0.35 Nm³/kg COD removed at STP)."
-)
-    st.markdown(status_badge("Benchmark: ≥50%" if ok5 else "Sub-optimal (<50%)", ok5), unsafe_allow_html=True)
+        label="Thermodynamic Yield", 
+        value=f"{thermodynamic_efficiency:.1f}%",
+        help="Raw output relative to 0.35 Nm³/kg COD at STP. Values reflect raw un-capped ODE kinetic and ML model predictions."
+    )
+st.markdown(status_badge("Benchmark: ≥50%" if ok5 else "Sub-optimal (<50%)", ok5), unsafe_allow_html=True)
     
 # --- RISK ANALYSIS & GRAPHICAL LAYOUT ---
 ENVIRONMENTAL_LIMIT_COD = 130.0
