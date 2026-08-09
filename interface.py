@@ -82,9 +82,12 @@ input_array = pd.DataFrame([[slider_cod, dilution_rate_calc, slider_temp]],
 predicted_effluent_cod = ai_engine.predict(input_array)[0]
 
 # --- UNLIMITED RAW DATASET CALCULATIONS ---
-# --- Scaled to 500 m³ Industrial Plant ---
+# Define lab-scale methane liters directly from simulation output
+methane_liters = methane_final
+
+# Scaled to 500 m³ Industrial Plant
 industrial_scale_factor = 500.0
-methane_liters_industrial = methane_final * industrial_scale_factor
+methane_liters_industrial = methane_liters * industrial_scale_factor
 methane_nm3 = methane_liters_industrial / 1000.0  # Gives ~50 Nm³/day
 
 # COD Removal Mass (kg/m³)
@@ -98,7 +101,7 @@ actual_yield_coefficient = methane_nm3 / cod_removed_kg_m3
 thermodynamic_efficiency = (actual_yield_coefficient / 0.35) * 100.0
 
 # Dynamic Financial Metrics based directly on raw methane yield
-revenue_per_day = methane_liters * 0.30  # Adjusted unit price
+revenue_per_day = methane_liters * 0.30  # Now uses defined methane_liters variable
 heating_cost_per_day = max(0.0, (slider_temp - 15.0) * 0.45)
 net_profit_per_day = revenue_per_day - heating_cost_per_day
 
