@@ -124,48 +124,54 @@ st.subheader("Engineering Data & Process KPIs")
 col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
-    col1_optimal = methane_nm3 >= 20.0
+    col1_ok = methane_nm3 >= 20.0
     st.metric(
         label="Biogas Volumetric Yield",
         value=f"{methane_nm3:.1f} Nm³/day",
-        delta="Target: >20.0 Nm³/day",
-        delta_color="normal" if col1_optimal else "inverse"
+        delta="Target: >20.0 Nm³/day" if col1_ok else "Low Yield (<20)",
+        delta_color="normal" if col1_ok else "inverse"
     )
 
 with col2:
-    col2_optimal = 40.0 <= x_final <= 200.0
+    if x_final < 40.0:
+        d_lbl, d_clr = "Washout Danger (<40)", "inverse"
+    elif x_final > 200.0:
+        d_lbl, d_clr = "High Density (>200)", "inverse"
+    else:
+        d_lbl, d_clr = "Safe: 40-200 mg/L", "normal"
+
     st.metric(
         label="Active Biomass Density",
         value=f"{x_final:.1f} mg/L",
-        delta="Safe: 40-200 mg/L",
-        delta_color="normal" if col2_optimal else "inverse"
+        delta=d_lbl,
+        delta_color=d_clr
     )
 
 with col3:
-    col3_optimal = predicted_effluent_cod <= 130.0
+    col3_ok = predicted_effluent_cod <= 130.0
     st.metric(
         label="Outgoing Pollution (COD)",
         value=f"{predicted_effluent_cod:.1f} mg/L",
-        delta="Limit: <130 mg/L",
-        delta_color="normal" if col3_optimal else "inverse"
+        delta="Limit: <130 mg/L" if col3_ok else "Non-Compliant (>130)",
+        delta_color="normal" if col3_ok else "inverse"
     )
-
+    
 with col4:
-    col4_optimal = biogas_model_accuracy >= 90.0
+    col4_ok = biogas_model_accuracy >= 90.0
     st.metric(
         label="ML Brain Accuracy (R²)",
         value=f"{biogas_model_accuracy:.1f}%",
-        delta="Benchmark: >90%",
-        delta_color="normal" if col4_optimal else "inverse"
+        delta="Benchmark: >90%" if col4_ok else "Low Accuracy (<90%)",
+        delta_color="normal" if col4_ok else "inverse"
     )
 
 with col5:
-    col5_optimal = thermodynamic_efficiency >= 50.0  # Or any target threshold you prefer
+    col5_ok = thermodynamic_efficiency >= 50.0
     st.metric(
         label="Thermodynamic Yield",
         value=f"{thermodynamic_efficiency:.1f}%",
-        delta="Benchmark: >= 50%",
-        delta_color="normal" if col5_optimal else "inverse"
+        delta="Benchmark: ≥50%" if col5_ok else "Sub-optimal (<50%)",
+        delta_color="normal" if col5_ok else "inverse"
     )
     
 # --- RISK ANALYSIS & GRAPHICAL LAYOUT ---
