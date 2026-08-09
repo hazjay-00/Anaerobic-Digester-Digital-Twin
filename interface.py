@@ -93,11 +93,10 @@ cod_removed_kg_m3 = max(0.0001, cod_removed_mg_l / 1000.0)
 actual_yield_coefficient = methane_nm3 / cod_removed_kg_m3
 
 # Uncapped Thermodynamic Yield relative to STP theoretical maximum (0.35 Nm³/kg COD)
-# Pure model output with NO min(100.0, ...) or temp thresholds
 thermodynamic_efficiency = (actual_yield_coefficient / 0.35) * 100.0
 
 # Dynamic Financial Metrics based directly on raw methane yield
-revenue_per_day = methane_liters * 0.30  # Adjusted unit price for bench/pilot scale
+revenue_per_day = methane_liters * 0.30  # Adjusted unit price
 heating_cost_per_day = max(0.0, (slider_temp - 15.0) * 0.45)
 net_profit_per_day = revenue_per_day - heating_cost_per_day
 
@@ -105,25 +104,15 @@ net_profit_per_day = revenue_per_day - heating_cost_per_day
 cod_removal_efficiency = ((slider_cod - predicted_effluent_cod) / slider_cod) * 100
 cod_removal_efficiency = max(0.0, min(100.0, cod_removal_efficiency))
 
-# KPI 2 - Thermodynamic Yield Versus Theoretical Maximum (0.35 Nm³/kg COD removed at STP)
-cod_removed_kg = (slider_cod - predicted_effluent_cod) / 1000.0
-
-if slider_temp >= 30 and cod_removed_kg > 0:
-    actual_yield_coefficient = methane_nm3 / cod_removed_kg
-    thermodynamic_efficiency = (actual_yield_coefficient / 0.35) * 100
-    # Cap at biological maximum (100.0%)
-    thermodynamic_efficiency = max(0.0, min(100.0, thermodynamic_efficiency))
-else:
-    thermodynamic_efficiency = 0.0
-
-# Helper function for arrowless colored status badges
+# Helper function for status badges
 def status_badge(text, is_ok):
     color = "#2ecc71" if is_ok else "#e74c3c"
     return f"<span style='color:{color}; font-size: 0.85rem; font-weight: 500;'>{text}</span>"
-    
+
 # --- FINANCIAL DASHBOARD ROW ---
 st.subheader("Real-Time Plant Economic Performance")
 fin_col1, fin_col2, fin_col3 = st.columns(3)
+
 with fin_col1:
     ok_rev = revenue_per_day >= 30.0
     st.metric(label="Gross Biogas Revenue", value=f"${revenue_per_day:,.2f} / day")
@@ -135,22 +124,15 @@ with fin_col2:
     st.markdown(status_badge("Budget Max: $10.00/day" if ok_spend else "Over Budget (>$10)", ok_spend), unsafe_allow_html=True)
 
 with fin_col3:
-    target_profit = 20.0  # Daily profit target threshold in dollars
+    target_profit = 20.0
     ok_profit = net_profit_per_day >= target_profit
     st.metric(label="Net Operational Profit", value=f"${net_profit_per_day:,.2f} / day")
-    st.markdown(
-        status_badge(
-            "Target: >$20.00/day" if ok_profit else "Low Margin (<$20)", 
-            ok_profit
-        ), 
-        unsafe_allow_html=True
-    )
-    
+    st.markdown(status_badge("Target: >$20.00/day" if ok_profit else "Low Margin (<$20)", ok_profit), unsafe_allow_html=True)
+
 st.markdown("---")
 
 # --- TECHNICAL METRICS & KPIs ROW ---
 st.subheader("Engineering Data & Process KPIs")
-
 col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
@@ -174,12 +156,13 @@ with col4:
     st.markdown(status_badge("Benchmark: >90%" if ok4 else "Low Accuracy (<90%)", ok4), unsafe_allow_html=True)
 
 with col5:
+    ok5 = thermodynamic_efficiency >= 50.0  # Defined ok5 variable
     st.metric(
         label="Thermodynamic Yield", 
         value=f"{thermodynamic_efficiency:.1f}%",
         help="Raw output relative to 0.35 Nm³/kg COD at STP. Values reflect raw un-capped ODE kinetic and ML model predictions."
     )
-st.markdown(status_badge("Benchmark: ≥50%" if ok5 else "Sub-optimal (<50%)", ok5), unsafe_allow_html=True)
+    st.markdown(status_badge("Benchmark: ≥50%" if ok5 else "Sub-optimal (<50%)", ok5), unsafe_allow_html=True)
     
 # --- RISK ANALYSIS & GRAPHICAL LAYOUT ---
 ENVIRONMENTAL_LIMIT_COD = 130.0
