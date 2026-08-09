@@ -231,7 +231,7 @@ report_data = pd.DataFrame({
     "Influent COD (mg/L)": [slider_cod],
     "Hydraulic Retention Time (days)": [slider_hrt],
     "Thermal Core Temp (°C)": [slider_temp],
-    "Methane Yield (Nm3/day)": [f"{methane_nm3:.2f}"],
+    "Methane Yield (Nm3/day)": [f"{methane_nm3:.1f}"],
     "Purification Efficiency (%)": [f"{cod_removal_efficiency:.1f}%"],
     "Thermodynamic Efficiency (%)": [f"{thermodynamic_efficiency:.1f}%"],
     "Net Operating Profit ($/day)": [f"${net_profit_per_day:.2f}"]
