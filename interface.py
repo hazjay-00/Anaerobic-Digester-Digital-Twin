@@ -82,9 +82,10 @@ input_array = pd.DataFrame([[slider_cod, dilution_rate_calc, slider_temp]],
 predicted_effluent_cod = ai_engine.predict(input_array)[0]
 
 # --- UNLIMITED RAW DATASET CALCULATIONS ---
-# Raw Methane Yield from ODE kinetics (Liters/day)
-methane_liters = methane_final
-methane_nm3 = methane_liters / 1000.0  # Normalized to Nm³
+# --- Scaled to 500 m³ Industrial Plant ---
+industrial_scale_factor = 500.0
+methane_liters_industrial = methane_final * industrial_scale_factor
+methane_nm3 = methane_liters_industrial / 1000.0  # Gives ~50 Nm³/day
 
 # COD Removal Mass (kg/m³)
 cod_removed_mg_l = slider_cod - predicted_effluent_cod
