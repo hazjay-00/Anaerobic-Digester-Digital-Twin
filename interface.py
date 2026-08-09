@@ -126,7 +126,7 @@ col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     st.metric(
         label="Biogas Volumetric Yield", 
-        value=f"{methane_nm3:.2f} Nm³/day", 
+        value=f"{methane_nm3:.1f} Nm³/day", 
         delta="Industrial Standard: Nm³"
     )
 with col2:
@@ -139,14 +139,14 @@ with col2:
 with col3:
     st.metric(
         label="Outgoing Pollution (Effluent COD)", 
-        value=f"{predicted_effluent_cod:.2f} mg/L",
+        value=f"{predicted_effluent_cod:.1f} mg/L",
         delta=f"Removal: {cod_removal_efficiency:.1f}% (Limit: <130 mg/L)",
         delta_color="inverse" if predicted_effluent_cod > 130 else "normal"
     )
 with col4:
     st.metric(
         label="ML Brain Accuracy (R² Score)", 
-        value=f"{biogas_model_accuracy:.2f} %", 
+        value=f"{biogas_model_accuracy:.1f} %", 
         delta="Cross-Validated (80/20 Train/Test Split)", 
         delta_color="normal"
     )
@@ -219,8 +219,8 @@ report_data = pd.DataFrame({
     "Control Mode": ["AI Optimized Framework" if st.session_state.optimized_mode else "Manual Control State"],
     "Influent COD (mg/L)": [slider_cod],
     "Hydraulic Retention Time (days)": [slider_hrt],
-    "Thermal Core Core Temp (C)": [slider_temp],
-    "Methane Yield (Nm3/day)": [f"{methane_nm3:.4f}"],
+    "Thermal Core Temp (°C)": [slider_temp],
+    "Methane Yield (Nm3/day)": [f"{methane_nm3:.2f}"],
     "Purification Efficiency (%)": [f"{cod_removal_efficiency:.1f}%"],
     "Thermodynamic Efficiency (%)": [f"{thermodynamic_efficiency:.1f}%"],
     "Net Operating Profit ($/day)": [f"${net_profit_per_day:.2f}"]
