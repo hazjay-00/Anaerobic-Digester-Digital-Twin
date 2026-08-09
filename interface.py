@@ -126,7 +126,9 @@ col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     st.metric(
         label="Biogas Volumetric Yield",
-        value=f"{methane_nm3:.1f} Nm³/day"
+        value=f"{methane_nm3:.1f} Nm³/day",
+        delta="Target: >20.0 Nm³/day",
+        delta_color="off"
     )
 
 with col2:
@@ -141,7 +143,7 @@ with col3:
     st.metric(
         label="Outgoing Pollution (COD)",
         value=f"{predicted_effluent_cod:.1f} mg/L",
-        delta=f"Removal: {cod_removal_efficiency:.1f}%",
+        delta="Limit: <130 mg/L",
         delta_color="off"
     )
 
@@ -149,14 +151,16 @@ with col4:
     st.metric(
         label="ML Brain Accuracy (R²)",
         value=f"{biogas_model_accuracy:.1f}%",
-        delta="80/20 Split",
+        delta="Benchmark: >90%",
         delta_color="off"
     )
 
 with col5:
     st.metric(
         label="Thermodynamic Yield",
-        value=f"{thermodynamic_efficiency:.1f}%"
+        value=f"{thermodynamic_efficiency:.1f}%",
+        delta="Max: 100%",
+        delta_color="off"
     )
     
 # --- RISK ANALYSIS & GRAPHICAL LAYOUT ---
