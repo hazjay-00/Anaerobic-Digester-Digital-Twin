@@ -164,7 +164,7 @@ with col5:
     st.metric(
         label="Thermodynamic Yield",
         value=f"{thermodynamic_efficiency:.1f}%",
-        delta="Max: 100%",
+        delta="Benchmark: >= 50%",
         delta_color="normal" if col5_optimal else "inverse"
     )
     
