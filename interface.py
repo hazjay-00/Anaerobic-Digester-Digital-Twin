@@ -152,15 +152,13 @@ with col4:
         label="ML Brain Accuracy (R²)",
         value=f"{biogas_model_accuracy:.1f}%",
         delta="Benchmark: >90%",
-        delta_color="off"
+        delta_color="green"
     )
 
 with col5:
     st.metric(
         label="Thermodynamic Yield",
         value=f"{thermodynamic_efficiency:.1f}%",
-        delta="Max: 100%",
-        delta_color="off"
     )
     
 # --- RISK ANALYSIS & GRAPHICAL LAYOUT ---
