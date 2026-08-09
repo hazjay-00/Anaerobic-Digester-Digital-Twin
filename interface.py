@@ -124,52 +124,24 @@ st.subheader("Engineering Data & Process KPIs")
 col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
-    col1_ok = methane_nm3 >= 20.0
-    st.metric(
-        label="Biogas Volumetric Yield",
-        value=f"{methane_nm3:.1f} Nm³/day",
-        delta="Target: >20.0 Nm³/day" if col1_ok else "Low Yield (<20)",
-        delta_color="off"
-    )
+    st.caption("Target: >20.0 Nm³/day")
+    st.metric(label="Biogas Volumetric Yield", value=f"{methane_nm3:.1f} Nm³/day")
 
 with col2:
-    if x_final < 40.0:
-        d_lbl = "Washout Danger (<40)"
-    elif x_final > 200.0:
-        d_lbl = "High Density (>200)"
-    else:
-        d_lbl = "Safe: 40-200 mg/L"
-
-    st.metric(
-        label="Active Biomass Density",
-        value=f"{x_final:.1f} mg/L",
-        delta=d_lbl,
-        delta_color="off"
-    )
+    st.caption("Safe: 40-200 mg/L")
+    st.metric(label="Active Biomass Density", value=f"{x_final:.1f} mg/L")
 
 with col3:
-    st.metric(
-        label="Outgoing Pollution (COD)",
-        value=f"{predicted_effluent_cod:.1f} mg/L",
-        delta="Limit: <130 mg/L" if predicted_effluent_cod <= 130.0 else "Non-Compliant (>130)",
-        delta_color="off"
-    )
-    
+    st.caption("Limit: <130 mg/L")
+    st.metric(label="Outgoing Pollution (COD)", value=f"{predicted_effluent_cod:.1f} mg/L")
+
 with col4:
-    st.metric(
-        label="ML Brain Accuracy (R²)",
-        value=f"{biogas_model_accuracy:.1f}%",
-        delta="Benchmark: >90%" if biogas_model_accuracy >= 90.0 else "Low Accuracy (<90%)",
-        delta_color="off"
-    )
+    st.caption("Benchmark: >90%")
+    st.metric(label="ML Brain Accuracy (R²)", value=f"{biogas_model_accuracy:.1f}%")
 
 with col5:
-    st.metric(
-        label="Thermodynamic Yield",
-        value=f"{thermodynamic_efficiency:.1f}%",
-        delta="Benchmark: ≥50%" if thermodynamic_efficiency >= 50.0 else "Sub-optimal (<50%)",
-        delta_color="off"
-    )
+    st.caption("Benchmark: ≥50%")
+    st.metric(label="Thermodynamic Yield", value=f"{thermodynamic_efficiency:.1f}%")
     
 # --- RISK ANALYSIS & GRAPHICAL LAYOUT ---
 ENVIRONMENTAL_LIMIT_COD = 130.0
