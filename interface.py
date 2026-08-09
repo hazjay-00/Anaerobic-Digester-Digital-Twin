@@ -128,7 +128,7 @@ with col1:
         label="Biogas Volumetric Yield",
         value=f"{methane_nm3:.1f} Nm³/day",
         delta="Target: >20.0 Nm³/day",
-        delta_color="off"
+        delta_color="green"
     )
 
 with col2:
@@ -136,7 +136,7 @@ with col2:
         label="Active Biomass Density",
         value=f"{x_final:.1f} mg/L",
         delta="Safe: 40-200 mg/L",
-        delta_color="off"
+        delta_color="green"
     )
 
 with col3:
@@ -144,7 +144,7 @@ with col3:
         label="Outgoing Pollution (COD)",
         value=f"{predicted_effluent_cod:.1f} mg/L",
         delta="Limit: <130 mg/L",
-        delta_color="off"
+        delta_color="green"
     )
 
 with col4:
