@@ -103,7 +103,11 @@ actual_yield_coefficient = methane_nm3 / cod_removed_kg
 thermodynamic_efficiency = (actual_yield_coefficient / 0.35) * 100
 thermodynamic_efficiency = max(0.0, min(100.0, thermodynamic_efficiency)) if slider_temp >= 30 else 0.0
 
-
+# Helper function for arrowless colored status badges
+def status_badge(text, is_ok):
+    color = "#2ecc71" if is_ok else "#e74c3c"
+    return f"<span style='color:{color}; font-size: 0.85rem; font-weight: 500;'>{text}</span>"
+    
 # --- FINANCIAL DASHBOARD ROW ---
 st.subheader("Real-Time Plant Economic Performance")
 fin_col1, fin_col2, fin_col3 = st.columns(3)
@@ -128,10 +132,6 @@ st.markdown("---")
 st.subheader("Engineering Data & Process KPIs")
 
 col1, col2, col3, col4, col5 = st.columns(5)
-
-def status_badge(text, is_ok):
-    color = "#2ecc71" if is_ok else "#e74c3c"
-    return f"<span style='color:{color}; font-size: 0.85rem; font-weight: 500;'>{text}</span>"
 
 with col1:
     ok1 = methane_nm3 >= 20.0
