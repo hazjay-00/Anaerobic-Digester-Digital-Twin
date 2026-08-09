@@ -53,12 +53,9 @@ def train_ai_operator_engine(df):
         pickle.dump(artifacts, f)
     print("Machine learning artifacts optimized and exported to 'twin_brain_cod.pkl'!")
 
-def run_pipeline():
-    df = generate_synthetic_industrial_dataset(samples=500) 
+def run_pipeline(samples=2000):
+    df = generate_synthetic_industrial_dataset(samples=samples)
     train_ai_operator_engine(df)
 
-# Auto-execute when imported by interface.py or run directly
-run_pipeline()
-
 if __name__ == "__main__":
-    pass
+    run_pipeline()
