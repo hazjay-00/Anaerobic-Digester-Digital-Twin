@@ -103,7 +103,7 @@ actual_yield_coefficient = methane_nm3_lab / cod_removed_kg_m3
 thermodynamic_efficiency = (actual_yield_coefficient / 0.35) * 100.0
 
 # Dynamic Financial Metrics based directly on raw methane yield
-revenue_per_day = methane_liters * 0.30  # Now uses defined methane_liters variable
+revenue_per_day = methane_nm3 * 0.80  # Yields ~$35.60/day at 44.5 Nm³/day
 heating_cost_per_day = max(0.0, (slider_temp - 15.0) * 0.45)
 net_profit_per_day = revenue_per_day - heating_cost_per_day
 
