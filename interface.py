@@ -62,9 +62,10 @@ if st.sidebar.button("Run AI Profit Optimization Engine", use_container_width=Tr
 # Unit Conversions & Labels
 if st.session_state.optimized_mode:
     st.sidebar.info("AI Automation Active: Knobs locked to peak performance baseline coordinates.")
-    slider_cod = st.sidebar.slider("Incoming Waste Concentration (COD mg/L)", 150, 800, 550, disabled=True)
-    slider_hrt = st.sidebar.slider("Hydraulic Retention Time (HRT days)", 3.3, 20.0, 9.1, step=0.1, disabled=True)
-    slider_temp = st.sidebar.slider("Digester Thermal Core Temperature (°C)", 20, 60, 38, disabled=True)
+    # Optimized values adjusted for positive net revenue
+    slider_cod = st.sidebar.slider("Incoming Waste Concentration (COD mg/L)", 150, 800, 750, disabled=True)
+    slider_hrt = st.sidebar.slider("Hydraulic Retention Time (HRT days)", 3.3, 20.0, 15.0, step=0.1, disabled=True)
+    slider_temp = st.sidebar.slider("Digester Thermal Core Temperature (°C)", 20, 60, 37, disabled=True)
 else:
     slider_cod = st.sidebar.slider("Incoming Waste Concentration (COD mg/L)", 150, 800, 450)
     slider_hrt = st.sidebar.slider("Hydraulic Retention Time (HRT days)", 3.3, 20.0, 6.7, step=0.1)
