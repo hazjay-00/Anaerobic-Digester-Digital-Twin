@@ -26,8 +26,10 @@ st.markdown("---")
 
 # --- AUTO-TRAIN CHECK FOR STREAMLIT CLOUD ---
 if not os.path.exists("twin_brain_cod.pkl"):
-    st.info("Generating Monte Carlo dataset and training AI Brain model for first-time setup...")
+    st.info("Generating dataset and training AI Brain model for first-time setup...")
     import ml_agent
+    df_sim = ml_agent.generate_synthetic_industrial_dataset()
+    ml_agent.train_ai_operator_engine(df_sim)
 
 # Load saved Day 2 AI Brain safely
 @st.cache_resource
@@ -98,10 +100,15 @@ cod_removal_efficiency = ((slider_cod - predicted_effluent_cod) / slider_cod) * 
 cod_removal_efficiency = max(0.0, min(100.0, cod_removal_efficiency))
 
 # KPI 2 - Thermodynamic Yield Versus Theoretical Maximum (0.35 Nm³/kg COD removed at STP)
-cod_removed_kg = max(0.001, (slider_cod - predicted_effluent_cod) / 1000.0) 
-actual_yield_coefficient = methane_nm3 / cod_removed_kg
-thermodynamic_efficiency = (actual_yield_coefficient / 0.35) * 100
-thermodynamic_efficiency = max(0.0, min(100.0, thermodynamic_efficiency)) if slider_temp >= 30 else 0.0
+cod_removed_kg = (slider_cod - predicted_effluent_cod) / 1000.0
+
+if slider_temp >= 30 and cod_removed_kg > 0:
+    actual_yield_coefficient = methane_nm3 / cod_removed_kg
+    thermodynamic_efficiency = (actual_yield_coefficient / 0.35) * 100
+    # Cap at biological maximum (100.0%)
+    thermodynamic_efficiency = max(0.0, min(100.0, thermodynamic_efficiency))
+else:
+    thermodynamic_efficiency = 0.0
 
 # Helper function for arrowless colored status badges
 def status_badge(text, is_ok):
@@ -162,7 +169,11 @@ with col4:
 
 with col5:
     ok5 = thermodynamic_efficiency >= 50.0
-    st.metric(label="Thermodynamic Yield", value=f"{thermodynamic_efficiency:.1f}%")
+    st.metric(
+    label="Thermodynamic Yield",
+    value=f"{thermodynamic_efficiency:.1f}%",
+    help="Percentage of theoretical maximum methane conversion (0.35 Nm³/kg COD removed at STP)."
+)
     st.markdown(status_badge("Benchmark: ≥50%" if ok5 else "Sub-optimal (<50%)", ok5), unsafe_allow_html=True)
     
 # --- RISK ANALYSIS & GRAPHICAL LAYOUT ---
@@ -202,6 +213,11 @@ with col_right:
         marker_color=['#E67E22', '#2ECC71', '#E74C3C']
     ))
     fig.update_layout(yaxis_title="Chemical Oxygen Demand (mg/L)", template="plotly_white", height=320)
+    fig.update_layout(
+    xaxis_title="",
+    margin=dict(b=60, t=20, l=10, r=10),
+)
+    fig.update_xaxes(tickangle=0)
     st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("---")
