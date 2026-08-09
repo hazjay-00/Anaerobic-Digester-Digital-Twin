@@ -126,7 +126,7 @@ col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     st.metric(
         label="Biogas Volumetric Yield", 
-        value=f"{methane_nm3:.4f} Nm³/day", 
+        value=f"{methane_nm3:.2f} Nm³/day", 
         delta="Industrial Standard: Nm³"
     )
 with col2:
@@ -140,6 +140,7 @@ with col3:
     st.metric(
         label="Outgoing Pollution (Effluent COD)", 
         value=f"{predicted_effluent_cod:.2f} mg/L",
+        delta=f"Removal: {cod_removal_efficiency:.1f}%",
         delta="Legal Limit: <130 mg/L",
         delta_color="inverse" if predicted_effluent_cod > 130 else "normal"
     )
