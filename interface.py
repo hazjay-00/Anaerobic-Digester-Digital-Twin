@@ -150,7 +150,13 @@ with col4:
         delta="Cross-Validated (80/20 Train/Test Split)", 
         delta_color="normal"
     )
-
+with col5:
+    st.metric(
+        label="Thermodynamic Yield Efficiency",
+        value=f"{thermodynamic_efficiency:.1f} %",
+        delta="Max Limit: 100% (0.35 Nm³/kg COD)"
+    )
+    
 # --- RISK ANALYSIS & GRAPHICAL LAYOUT ---
 ENVIRONMENTAL_LIMIT_COD = 130.0
 col_left, col_right = st.columns(2)
@@ -216,7 +222,7 @@ report_data = pd.DataFrame({
     "Thermal Core Core Temp (C)": [slider_temp],
     "Methane Yield (Nm3/day)": [f"{methane_nm3:.4f}"],
     "Purification Efficiency (%)": [f"{cod_removal_efficiency:.1f}%"],
-    "Thermodynamic Efficiency (%)": [f"${thermodynamic_efficiency:.1f}%"],
+    "Thermodynamic Efficiency (%)": [f"{thermodynamic_efficiency:.1f}%"],
     "Net Operating Profit ($/day)": [f"${net_profit_per_day:.2f}"]
 })
 
