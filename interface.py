@@ -121,7 +121,7 @@ st.markdown("---")
 # --- TECHNICAL METRICS & KPIs ROW ---
 st.subheader("Engineering Data & Process KPIs")
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
     st.metric(
