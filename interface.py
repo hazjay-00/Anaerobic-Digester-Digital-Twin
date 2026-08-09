@@ -82,20 +82,22 @@ input_array = pd.DataFrame([[slider_cod, dilution_rate_calc, slider_temp]],
 predicted_effluent_cod = ai_engine.predict(input_array)[0]
 
 # --- UNLIMITED RAW DATASET CALCULATIONS ---
-# Define lab-scale methane liters directly from simulation output
+# Raw Methane Yield from ODE kinetics (Liters/day per m³ reactor)
 methane_liters = methane_final
+methane_nm3_lab = methane_liters / 1000.0  # Raw Nm³ from 1 m³ reactor
 
-# Scaled to 500 m³ Industrial Plant
+# Industrial 500 m³ scaling
 industrial_scale_factor = 500.0
 methane_liters_industrial = methane_liters * industrial_scale_factor
-methane_nm3 = methane_liters_industrial / 1000.0  # Gives ~50 Nm³/day
+methane_nm3 = methane_liters_industrial / 1000.0  # 49.9 Nm³/day total plant output
 
 # COD Removal Mass (kg/m³)
 cod_removed_mg_l = slider_cod - predicted_effluent_cod
 cod_removed_kg_m3 = max(0.0001, cod_removed_mg_l / 1000.0)
 
 # Uncapped Specific Methane Yield (Nm³ CH4 / kg COD removed)
-actual_yield_coefficient = methane_nm3 / cod_removed_kg_m3
+# Evaluate using lab-scale Nm³ per m³ so volume factors cancel out cleanly
+actual_yield_coefficient = methane_nm3_lab / cod_removed_kg_m3
 
 # Uncapped Thermodynamic Yield relative to STP theoretical maximum (0.35 Nm³/kg COD)
 thermodynamic_efficiency = (actual_yield_coefficient / 0.35) * 100.0
