@@ -124,7 +124,7 @@ with fin_col2:
 with fin_col3:
     target_profit = 20.0  # Daily profit target threshold in dollars
     ok_profit = net_profit_per_day >= target_profit
-    st.metric(label="Net Operational Margin", value=f"${net_profit_per_day:,.2f} / day")
+    st.metric(label="Net Operational Profit", value=f"${net_profit_per_day:,.2f} / day")
     st.markdown(
         status_badge(
             "Target: >$20.00/day" if ok_profit else "Low Margin (<$20)", 
