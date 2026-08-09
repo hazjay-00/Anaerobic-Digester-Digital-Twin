@@ -65,7 +65,7 @@ if st.session_state.optimized_mode:
     # Optimized values adjusted for positive net revenue
     slider_cod = st.sidebar.slider("Incoming Waste Concentration (COD mg/L)", 150, 800, 750, disabled=True)
     slider_hrt = st.sidebar.slider("Hydraulic Retention Time (HRT days)", 3.3, 20.0, 15.0, step=0.1, disabled=True)
-    slider_temp = st.sidebar.slider("Digester Thermal Core Temperature (°C)", 20, 60, 37, disabled=True)
+    slider_temp = st.sidebar.slider("Digester Thermal Core Temperature (°C)", 25, 45, 37, disabled=True)
 else:
     slider_cod = st.sidebar.slider("Incoming Waste Concentration (COD mg/L)", 150, 800, 450)
     slider_hrt = st.sidebar.slider("Hydraulic Retention Time (HRT days)", 3.3, 20.0, 6.7, step=0.1)
@@ -234,15 +234,14 @@ with st.expander("View Architecture & Mathematical Methodology"):
 st.subheader("Operational Reporting Metrics")
 
 report_data = pd.DataFrame({
-    "Timestamp": [pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")],
-    "Control Mode": ["AI Optimized Framework" if st.session_state.optimized_mode else "Manual Control State"],
+    "Timestamp": [pd.Timestamp.now(tz="UTC").strftime("%Y-%m-%d %H:%M:%S UTC")],
     "Influent COD (mg/L)": [slider_cod],
-    "Hydraulic Retention Time (days)": [slider_hrt],
-    "Thermal Core Temp (°C)": [slider_temp],
-    "Methane Yield (Nm3/day)": [f"{methane_nm3:.1f}"],
-    "Purification Efficiency (%)": [f"{cod_removal_efficiency:.1f}%"],
-    "Thermodynamic Efficiency (%)": [f"{thermodynamic_efficiency:.1f}%"],
-    "Net Operating Profit ($/day)": [f"${net_profit_per_day:.2f}"]
+    "Hydraulic Retention Time (Days)": [slider_hrt],
+    "Operating Temperature (°C)": [slider_temp],
+    "Effluent COD (mg/L)": [round(predicted_effluent_cod, 2)],
+    "Biogas Yield (Nm³/day)": [round(methane_nm3, 2)],
+    "Thermodynamic Yield (%)": [round(thermodynamic_efficiency, 2)],
+    "Net Operational Profit ($/day)": [round(net_profit_per_day, 2)]
 })
 
 st.dataframe(report_data, hide_index=True, use_container_width=True)
