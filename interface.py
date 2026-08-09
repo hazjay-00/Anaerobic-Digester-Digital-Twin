@@ -81,19 +81,26 @@ input_array = pd.DataFrame([[slider_cod, dilution_rate_calc, slider_temp]], colu
 predicted_effluent_cod = ai_engine.predict(input_array)[0]
 
 # --- REALISTIC INDUSTRIAL ALIGNMENT MATH ---
-if slider_temp < 30:
-    corrected_methane = 0.0
-    methane_nm3 = 0.0
-    revenue_per_day = 0.0
-    heating_cost_per_day = 15.50  
-    net_profit_per_day = -heating_cost_per_day
+# Organic methane output directly from simulation_engine.py (Liters)
+methane_liters = methane_final  
+
+# Calculate actual COD removed (mg/L -> g/L or kg/m³)
+cod_removed = max(0.001, slider_cod - predicted_effluent_cod)
+
+# Organic Yield Coefficient (L CH4 / g COD removed)
+if cod_removed > 0 and methane_liters > 0:
+    # Lab-scale / unit normalized yield (L CH4 / g COD)
+    specific_yield = methane_liters / (cod_removed / 1000.0) 
+    
+    # Pure thermodynamic efficiency without hard caps
+    thermodynamic_efficiency = (specific_yield / 0.35) * 100
 else:
-    lab_methane_liters = methane_final
-    industrial_methane_liters = lab_methane_liters * 500.0  
-    methane_nm3 = industrial_methane_liters / 1000.0  
-    revenue_per_day = methane_nm3 * 1.50 
-    heating_cost_per_day = max(0.0, (slider_temp - 15.0) * 0.45)
-    net_profit_per_day = revenue_per_day - heating_cost_per_day
+    thermodynamic_efficiency = 0.0
+
+# Revenue & utility costs based on continuous methane yield
+revenue_per_day = methane_liters * 0.003  # Direct scale against raw output
+heating_cost_per_day = max(0.0, (slider_temp - 15.0) * 0.45)
+net_profit_per_day = revenue_per_day - heating_cost_per_day
 
 # Process Wastewater Purification Efficiency KPI
 cod_removal_efficiency = ((slider_cod - predicted_effluent_cod) / slider_cod) * 100
