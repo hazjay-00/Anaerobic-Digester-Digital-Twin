@@ -80,25 +80,24 @@ s_final, x_final, methane_final = run_plant_simulation(slider_cod, dilution_rate
 input_array = pd.DataFrame([[slider_cod, dilution_rate_calc, slider_temp]], columns=['Inflow_COD', 'Dilution_Rate', 'Temperature'])
 predicted_effluent_cod = ai_engine.predict(input_array)[0]
 
-# --- REALISTIC INDUSTRIAL ALIGNMENT MATH ---
-# Organic methane output directly from simulation_engine.py (Liters)
-methane_liters = methane_final  
+# --- PURE KINETIC & SYNTHETIC DATA CALCULATIONS ---
+methane_liters = methane_final
+methane_nm3 = methane_liters / 1000.0  # Defines methane_nm3 to fix the NameError
 
-# Calculate actual COD removed (mg/L -> g/L or kg/m³)
+# Calculate actual COD removed (mg/L)
 cod_removed = max(0.001, slider_cod - predicted_effluent_cod)
 
-# Organic Yield Coefficient (L CH4 / g COD removed)
-if cod_removed > 0 and methane_liters > 0:
-    # Lab-scale / unit normalized yield (L CH4 / g COD)
-    specific_yield = methane_liters / (cod_removed / 1000.0) 
-    
-    # Pure thermodynamic efficiency without hard caps
-    thermodynamic_efficiency = (specific_yield / 0.35) * 100
+# Thermodynamic Yield calculation using organic inputs
+cod_removed_kg = cod_removed / 1000.0
+if slider_temp >= 30 and cod_removed_kg > 0:
+    actual_yield_coefficient = methane_nm3 / cod_removed_kg
+    thermodynamic_efficiency = (actual_yield_coefficient / 0.35) * 100
+    thermodynamic_efficiency = max(0.0, min(100.0, thermodynamic_efficiency))
 else:
     thermodynamic_efficiency = 0.0
 
-# Revenue & utility costs based on continuous methane yield
-revenue_per_day = methane_liters * 0.003  # Direct scale against raw output
+# Financial Metrics
+revenue_per_day = methane_liters * 0.003
 heating_cost_per_day = max(0.0, (slider_temp - 15.0) * 0.45)
 net_profit_per_day = revenue_per_day - heating_cost_per_day
 
