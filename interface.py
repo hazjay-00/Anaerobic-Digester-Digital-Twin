@@ -123,25 +123,34 @@ st.subheader("Engineering Data & Process KPIs")
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
+def status_badge(text, is_ok):
+    color = "#2ecc71" if is_ok else "#e74c3c"
+    return f"<span style='color:{color}; font-size: 0.85rem; font-weight: 500;'>{text}</span>"
+
 with col1:
-    st.caption("Target: >20.0 Nm³/day")
+    ok1 = methane_nm3 >= 20.0
     st.metric(label="Biogas Volumetric Yield", value=f"{methane_nm3:.1f} Nm³/day")
+    st.markdown(status_badge("Target: >20.0 Nm³/day" if ok1 else "Low Yield (<20)", ok1), unsafe_allow_html=True)
 
 with col2:
-    st.caption("Safe: 40-200 mg/L")
+    ok2 = 40.0 <= x_final <= 200.0
     st.metric(label="Active Biomass Density", value=f"{x_final:.1f} mg/L")
+    st.markdown(status_badge("Safe: 40-200 mg/L" if ok2 else "Out of Safe Bounds", ok2), unsafe_allow_html=True)
 
 with col3:
-    st.caption("Limit: <130 mg/L")
+    ok3 = predicted_effluent_cod <= 130.0
     st.metric(label="Outgoing Pollution (COD)", value=f"{predicted_effluent_cod:.1f} mg/L")
+    st.markdown(status_badge("Limit: <130 mg/L" if ok3 else "Non-Compliant (>130)", ok3), unsafe_allow_html=True)
 
 with col4:
-    st.caption("Benchmark: >90%")
+    ok4 = biogas_model_accuracy >= 90.0
     st.metric(label="ML Brain Accuracy (R²)", value=f"{biogas_model_accuracy:.1f}%")
+    st.markdown(status_badge("Benchmark: >90%" if ok4 else "Low Accuracy (<90%)", ok4), unsafe_allow_html=True)
 
 with col5:
-    st.caption("Benchmark: ≥50%")
+    ok5 = thermodynamic_efficiency >= 50.0
     st.metric(label="Thermodynamic Yield", value=f"{thermodynamic_efficiency:.1f}%")
+    st.markdown(status_badge("Benchmark: ≥50%" if ok5 else "Sub-optimal (<50%)", ok5), unsafe_allow_html=True)
     
 # --- RISK ANALYSIS & GRAPHICAL LAYOUT ---
 ENVIRONMENTAL_LIMIT_COD = 130.0
