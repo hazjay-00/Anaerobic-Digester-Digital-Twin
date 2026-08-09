@@ -108,13 +108,19 @@ thermodynamic_efficiency = max(0.0, min(100.0, thermodynamic_efficiency)) if sli
 st.subheader("Real-Time Plant Economic Performance")
 fin_col1, fin_col2, fin_col3 = st.columns(3)
 with fin_col1:
-    st.metric(label="Gross Biogas Revenue", value=f"${revenue_per_day:,.2f} / day", delta="Target: >$30.00/day")
+    ok_rev = revenue_per_day >= 30.0
+    st.metric(label="Gross Biogas Revenue", value=f"${revenue_per_day:,.2f} / day")
+    st.markdown(status_badge("Target: >$30.00/day" if ok_rev else "Low Revenue (<$30)", ok_rev), unsafe_allow_html=True)
+
 with fin_col2:
-    st.metric(label="Thermal Utility Spend", value=f"${heating_cost_per_day:,.2f} / day", delta="Budget Max: $10.00/day", delta_color="inverse")
+    ok_spend = heating_cost_per_day <= 10.0
+    st.metric(label="Thermal Utility Spend", value=f"${heating_cost_per_day:,.2f} / day")
+    st.markdown(status_badge("Budget Max: $10.00/day" if ok_spend else "Over Budget (>$10)", ok_spend), unsafe_allow_html=True)
+
 with fin_col3:
-    profit_status = "normal" if net_profit_per_day > 0 else "inverse"
-    profit_text = "Status: Profitable" if net_profit_per_day > 0 else "Status: OPERATIONAL LOSS"
-    st.metric(label="Net Operational Margin", value=f"${net_profit_per_day:,.2f} / day", delta=profit_text, delta_color=profit_status)
+    ok_profit = net_profit_per_day > 0.0
+    st.metric(label="Net Operational Margin", value=f"${net_profit_per_day:,.2f} / day")
+    st.markdown(status_badge("Status: Profitable" if ok_profit else "Status: OPERATIONAL LOSS", ok_profit), unsafe_allow_html=True)
 
 st.markdown("---")
 
