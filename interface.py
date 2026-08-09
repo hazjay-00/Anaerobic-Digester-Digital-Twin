@@ -219,7 +219,7 @@ with st.expander("View Architecture & Mathematical Methodology"):
     
     ### Thermodynamic Efficiency Limits
     Theoretical conversion at Standard Temperature and Pressure (STP) dictates that the complete conversion of **1 kg of Chemical Oxygen Demand (COD)** yields exactly **0.35 Normal Cubic Meters ($Nm^3$) of Methane gas**. 
-    The *Thermodynamic Biokinetic Efficiency* card monitors the ratio of actual yield against this absolute biological boundary.
+    The *Thermodynamic Yield* card monitors the ratio of actual yield against this absolute biological boundary.
     """)
 
 # --- DOWNLOADABLE REPORT ---
