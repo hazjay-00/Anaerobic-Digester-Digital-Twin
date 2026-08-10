@@ -12,7 +12,10 @@ def anaerobic_kinetics(y, t, S_inflow, D, Temperature):
     S, X, M = y
     
     # Temperature correction factor (Arrhenius adaptation for bacteria kinetics)
-    T_factor = np.exp(0.07 * (Temperature - 35.0))
+    if Temperature > 45.0:
+        T_factor = np.exp(0.07 * (45.0 - 35.0)) * np.exp(-0.15 * (Temperature - 45.0))
+    else:
+        T_factor = np.exp(0.07 * (Temperature - 35.0))
     
     # Kinetic Parameters
     mu_max = 0.40 * T_factor  # Max growth rate scaled by temperature
