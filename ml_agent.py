@@ -13,7 +13,7 @@ def generate_synthetic_industrial_dataset(samples=2000):
     
     inflow_cod = np.random.uniform(150.0, 800.0, samples)     # Input Pollution (mg/L)
     dilution_rate = np.random.uniform(0.05, 0.30, samples)    # Flow Velocity (1/days)
-    tank_temp = np.random.uniform(25.0, 45.0, samples)        # Inside Temp (°C)
+    tank_temp = np.random.uniform(20.0, 60.0, samples)        # Inside Temp (°C)
     
     dataset = []
     
