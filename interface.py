@@ -53,7 +53,6 @@ if "optimized_mode" not in st.session_state:
     st.session_state.optimized_mode = False
 
 # SIDEBAR CONTROL DIALS
-# SIDEBAR CONTROL DIALS
 st.sidebar.header("Plant Actuator Valve Knobs")
 
 if st.sidebar.button("Run AI Profit Optimization Engine", use_container_width=True, type="secondary"):
