@@ -49,7 +49,6 @@ except TypeError:
     st.warning("Upgrading payload format... Please re-run ml_agent.py in your terminal first to synchronize files.")
     st.stop()
 
-
 if "optimized_mode" not in st.session_state:
     st.session_state.optimized_mode = False
 
@@ -81,7 +80,6 @@ input_array = pd.DataFrame([[slider_cod, dilution_rate_calc, slider_temp]],
 predicted_effluent_cod = ai_engine.predict(input_array)[0]
 
 # UNLIMITED RAW DATASET CALCULATIONS
-# Raw Methane Yield from ODE kinetics (Liters/day per m³ reactor)
 methane_liters = methane_final
 methane_nm3_lab = methane_liters / 1000.0 
 
@@ -90,64 +88,17 @@ industrial_scale_factor = 500.0
 methane_liters_industrial = methane_liters * industrial_scale_factor
 methane_nm3 = methane_liters_industrial / 1000.0 
 
-import numpy as np
-import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
-import pickle
-from simulation_engine import run_plant_simulation
+# COD Removal Mass (kg/m³) & Thermodynamic Efficiency
+cod_removed_mg_l = slider_cod - predicted_effluent_cod
 
-def generate_synthetic_industrial_dataset(samples=2000):
-    """Simulates distinct operational permutations across full UI control limits."""
-    print("Running Data Factory Monte Carlo Loop. Generating plant states...")
-    np.random.seed(42)
-    
-    # Matches UI slider bounds exactly (20°C to 60°C)
-    inflow_cod = np.random.uniform(150.0, 800.0, samples)     # Input Pollution (mg/L)
-    dilution_rate = np.random.uniform(0.05, 0.30, samples)    # Dilution Rate (1/days)
-    tank_temp = np.random.uniform(20.0, 60.0, samples)        # Inside Temp (°C)
+if cod_removed_mg_l <= 5.0 or methane_nm3_lab <= 0:
+    thermodynamic_efficiency = 0.0
+else:
+    cod_removed_kg_m3 = cod_removed_mg_l / 1000.0
+    actual_yield_coefficient = methane_nm3_lab / cod_removed_kg_m3
+    # Cap thermodynamic efficiency at 100% STP maximum (0.35 Nm³/kg COD)
+    thermodynamic_efficiency = min(100.0, (actual_yield_coefficient / 0.35) * 100.0)
 
-    dataset = []
-    for i in range(samples):
-        s_out, x_out, methane_out = run_plant_simulation(inflow_cod[i], dilution_rate[i], tank_temp[i])
-        dataset.append([inflow_cod[i], dilution_rate[i], tank_temp[i], s_out, x_out, methane_out])
-
-    df = pd.DataFrame(dataset, columns=['Inflow_COD', 'Dilution_Rate', 'Temperature', 'Effluent_COD', 'Biomass_Density', 'Methane_Yield'])
-    df.to_csv("simulated_plant_data.csv", index=False)
-    print("Dataset manufactured successfully and saved to 'simulated_plant_data.csv'!")
-    return df
-
-def train_ai_operator_engine(df):
-    """Trains the Machine Learning models on the synthetic data loops."""
-    print("Organizing Data Partition Loops (80/20 Train-Test Framework)...")
-    X = df[['Inflow_COD', 'Dilution_Rate', 'Temperature']]
-    y_cod = df['Effluent_COD']
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y_cod, test_size=0.2, random_state=42)
-
-    rf_cod_model = RandomForestRegressor(n_estimators=100, random_state=42)
-    rf_cod_model.fit(X_train, y_train)
-
-    y_pred = rf_cod_model.predict(X_test)
-    real_biogas_r2 = r2_score(y_test, y_pred) * 100.0
-
-    print(f"ML Brain Training Complete. Test set COD prediction R² score: {real_biogas_r2:.2f}%")
-
-    artifacts = {
-        "model": rf_cod_model,
-        "r2_score": real_biogas_r2
-    }
-
-    with open("twin_brain_cod.pkl", "wb") as f:
-        pickle.dump(artifacts, f)
-
-    print("Model payload successfully written to 'twin_brain_cod.pkl'!")
-    return real_biogas_r2
-
-if __name__ == "__main__":
-    df_sim = generate_synthetic_industrial_dataset()
-    train_ai_operator_engine(df_sim)
 # Dynamic Financial Metrics
 revenue_per_day = methane_nm3 * 0.80 
 heating_cost_per_day = max(0.0, (slider_temp - 15.0) * 0.45)
@@ -213,7 +164,7 @@ with col5:
     st.metric(
         label="Thermodynamic Yield", 
         value=f"{thermodynamic_efficiency:.1f}%",
-        help="Raw output relative to 0.35 Nm³/kg COD at STP. Values reflect raw un-capped ODE kinetic and ML model predictions."
+        help="Raw output relative to 0.35 Nm³/kg COD at STP."
     )
     st.markdown(status_badge("Benchmark: ≥50%" if ok5 else "Sub-optimal (<50%)", ok5), unsafe_allow_html=True)
     
@@ -255,9 +206,9 @@ with col_right:
     ))
     fig.update_layout(yaxis_title="Chemical Oxygen Demand (mg/L)", template="plotly_white", height=320)
     fig.update_layout(
-    xaxis_title="",
-    margin=dict(b=60, t=20, l=10, r=10),
-)
+        xaxis_title="",
+        margin=dict(b=60, t=20, l=10, r=10),
+    )
     fig.update_xaxes(tickangle=0)
     st.plotly_chart(fig, use_container_width=True)
 
@@ -292,4 +243,10 @@ report_data = pd.DataFrame({
 
 st.dataframe(report_data, hide_index=True, use_container_width=True)
 
-st.download_button(label="Export Current Plant Metrics to Shift CSV Report", data=report_data.to_csv(index=False), file_name="ad_twin_shift_report.csv", mime="text/csv", use_container_width=True)
+st.download_button(
+    label="Export Current Plant Metrics to Shift CSV Report",
+    data=report_data.to_csv(index=False),
+    file_name="ad_twin_shift_report.csv",
+    mime="text/csv",
+    use_container_width=True
+)
