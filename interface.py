@@ -162,9 +162,9 @@ with col4:
 with col5:
     ok5 = thermodynamic_efficiency >= 50.0 
     st.metric(
-        label="Thermodynamic Yield", 
+        label="Thermodynamic Efficiency", 
         value=f"{thermodynamic_efficiency:.1f}%",
-        help="Raw output relative to 0.35 Nm³/kg COD at STP."
+        help="Actual conversion relative to theoretical maximum (0.35 Nm³/kg COD at STP)"
     )
     st.markdown(status_badge("Benchmark: ≥50%" if ok5 else "Sub-optimal (<50%)", ok5), unsafe_allow_html=True)
     
@@ -224,7 +224,7 @@ with st.expander("View Architecture & Mathematical Methodology"):
     
     ### Thermodynamic Efficiency Limits
     Theoretical conversion at Standard Temperature and Pressure (STP) dictates that the complete conversion of **1 kg of Chemical Oxygen Demand (COD)** yields exactly **0.35 Normal Cubic Meters ($Nm^3$) of Methane gas**. 
-    The *Thermodynamic Yield* card monitors the ratio of actual yield against this absolute biological boundary.
+    The *Thermodynamic Efficiency* card monitors the ratio of actual yield against this absolute biological boundary.
     """)
 
 # DOWNLOADABLE REPORT
@@ -237,7 +237,7 @@ report_data = pd.DataFrame({
     "Operating Temperature (°C)": [slider_temp],
     "Effluent COD (mg/L)": [round(predicted_effluent_cod, 2)],
     "Biogas Yield (Nm³/day)": [round(methane_nm3, 2)],
-    "Thermodynamic Yield (%)": [round(thermodynamic_efficiency, 2)],
+    "Thermodynamic Efficiency (%)": [round(thermodynamic_efficiency, 2)],
     "Net Operational Profit ($/day)": [round(net_profit_per_day, 2)]
 })
 
