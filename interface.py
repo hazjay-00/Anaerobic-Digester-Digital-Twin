@@ -3,12 +3,12 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import pickle
-import os  # Added to check file system state
+import os  
 from simulation_engine import run_plant_simulation
 
 st.set_page_config(page_title="Anaerobic Digester Digital Twin", layout="wide")
 
-# --- EMERGENCY KILL SWITCH ---
+# EMERGENCY KILL SWITCH
 if "kill_switch" not in st.session_state:
     st.session_state.kill_switch = False
 
@@ -24,21 +24,21 @@ st.title("Anaerobic Digester Digital Twin")
 st.caption("Hybrid Monod-Haldane Kinetics & Empirical Effluent Modeling")
 st.markdown("---")
 
-# --- AUTO-TRAIN CHECK FOR STREAMLIT CLOUD ---
+# AUTO-TRAIN CHECK FOR STREAMLIT CLOUD
 if not os.path.exists("twin_brain_cod.pkl"):
     st.info("Generating dataset and training AI Brain model for first-time setup...")
     import ml_agent
     df_sim = ml_agent.generate_synthetic_industrial_dataset()
     ml_agent.train_ai_operator_engine(df_sim)
 
-# Load saved Day 2 AI Brain safely
+# Load AI Brain safely
 @st.cache_resource
 def load_ai_brain():
     with open("twin_brain_cod.pkl", "rb") as f:
         return pickle.load(f)
 
 try:
-    # Unpacking the dictionary payload cleanly
+    # Unpacking the dictionary payload
     artifacts = load_ai_brain()
     ai_engine = artifacts["model"]
     biogas_model_accuracy = artifacts["r2_score"]
@@ -53,16 +53,15 @@ except TypeError:
 if "optimized_mode" not in st.session_state:
     st.session_state.optimized_mode = False
 
-# --- SIDEBAR CONTROL DIALS ---
+# SIDEBAR CONTROL DIALS
 st.sidebar.header("Plant Actuator Valve Knobs")
 
 if st.sidebar.button("Run AI Profit Optimization Engine", use_container_width=True, type="secondary"):
     st.session_state.optimized_mode = not st.session_state.optimized_mode
 
-# Unit Conversions & Labels
+# Unit Conversions and Labels
 if st.session_state.optimized_mode:
     st.sidebar.info("AI Automation Active: Knobs locked to peak performance baseline coordinates.")
-    # Optimized values adjusted for positive net revenue
     slider_cod = st.sidebar.slider("Incoming Waste Concentration (COD mg/L)", 150, 800, 750, disabled=True)
     slider_hrt = st.sidebar.slider("Hydraulic Retention Time (HRT days)", 3.3, 20.0, 15.0, step=0.1, disabled=True)
     slider_temp = st.sidebar.slider("Digester Thermal Core Temperature (°C)", 25, 45, 37, disabled=True)
@@ -71,39 +70,38 @@ else:
     slider_hrt = st.sidebar.slider("Hydraulic Retention Time (HRT days)", 3.3, 20.0, 6.7, step=0.1)
     slider_temp = st.sidebar.slider("Digester Thermal Core Temperature (°C)", 20, 60, 37)
 
-# Convert HRT back to dilution rate for background calculations
+# Convert HRT back to dilution rate
 dilution_rate_calc = 1.0 / slider_hrt
 
-# --- READ REAL-TIME PHYSICS SIMULATION & ML BRAIN ---
+# READ REAL-TIME PHYSICS SIMULATION & ML BRAIN
 s_final, x_final, methane_final = run_plant_simulation(slider_cod, dilution_rate_calc, slider_temp)
 
 input_array = pd.DataFrame([[slider_cod, dilution_rate_calc, slider_temp]], 
                            columns=['Inflow_COD', 'Dilution_Rate', 'Temperature'])
 predicted_effluent_cod = ai_engine.predict(input_array)[0]
 
-# --- UNLIMITED RAW DATASET CALCULATIONS ---
+# UNLIMITED RAW DATASET CALCULATIONS
 # Raw Methane Yield from ODE kinetics (Liters/day per m³ reactor)
 methane_liters = methane_final
-methane_nm3_lab = methane_liters / 1000.0  # Raw Nm³ from 1 m³ reactor
+methane_nm3_lab = methane_liters / 1000.0 
 
 # Industrial 500 m³ scaling
 industrial_scale_factor = 500.0
 methane_liters_industrial = methane_liters * industrial_scale_factor
-methane_nm3 = methane_liters_industrial / 1000.0  # 49.9 Nm³/day total plant output
+methane_nm3 = methane_liters_industrial / 1000.0 
 
 # COD Removal Mass (kg/m³)
 cod_removed_mg_l = slider_cod - predicted_effluent_cod
 cod_removed_kg_m3 = max(0.0001, cod_removed_mg_l / 1000.0)
 
-# Uncapped Specific Methane Yield (Nm³ CH4 / kg COD removed)
-# Evaluate using lab-scale Nm³ per m³ so volume factors cancel out cleanly
+# Specific Methane Yield (Nm³ CH4 / kg COD removed)
 actual_yield_coefficient = methane_nm3_lab / cod_removed_kg_m3
 
-# Uncapped Thermodynamic Yield relative to STP theoretical maximum (0.35 Nm³/kg COD)
+# Thermodynamic Yield relative to STP theoretical maximum (0.35 Nm³/kg COD)
 thermodynamic_efficiency = (actual_yield_coefficient / 0.35) * 100.0
 
-# Dynamic Financial Metrics based directly on raw methane yield
-revenue_per_day = methane_nm3 * 0.80  # Yields ~$35.60/day at 44.5 Nm³/day
+# Dynamic Financial Metrics
+revenue_per_day = methane_nm3 * 0.80 
 heating_cost_per_day = max(0.0, (slider_temp - 15.0) * 0.45)
 net_profit_per_day = revenue_per_day - heating_cost_per_day
 
@@ -116,7 +114,7 @@ def status_badge(text, is_ok):
     color = "#2ecc71" if is_ok else "#e74c3c"
     return f"<span style='color:{color}; font-size: 0.85rem; font-weight: 500;'>{text}</span>"
 
-# --- FINANCIAL DASHBOARD ROW ---
+# FINANCIAL DASHBOARD ROW
 st.subheader("Real-Time Plant Economic Performance")
 fin_col1, fin_col2, fin_col3 = st.columns(3)
 
@@ -138,7 +136,7 @@ with fin_col3:
 
 st.markdown("---")
 
-# --- TECHNICAL METRICS & KPIs ROW ---
+# TECHNICAL METRICS AND KPIs
 st.subheader("Engineering Data & Process KPIs")
 col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -163,7 +161,7 @@ with col4:
     st.markdown(status_badge("Benchmark: >90%" if ok4 else "Low Accuracy (<90%)", ok4), unsafe_allow_html=True)
 
 with col5:
-    ok5 = thermodynamic_efficiency >= 50.0  # Defined ok5 variable
+    ok5 = thermodynamic_efficiency >= 50.0 
     st.metric(
         label="Thermodynamic Yield", 
         value=f"{thermodynamic_efficiency:.1f}%",
@@ -171,7 +169,7 @@ with col5:
     )
     st.markdown(status_badge("Benchmark: ≥50%" if ok5 else "Sub-optimal (<50%)", ok5), unsafe_allow_html=True)
     
-# --- RISK ANALYSIS & GRAPHICAL LAYOUT ---
+# RISK ANALYSIS AND GRAPHICAL LAYOUT
 ENVIRONMENTAL_LIMIT_COD = 130.0
 col_left, col_right = st.columns(2)
 
@@ -217,7 +215,7 @@ with col_right:
 
 st.markdown("---")
 
-# --- EXPANDABLE METHODOLOGY SECTION---
+# EXPANDABLE METHODOLOGY SECTION
 with st.expander("View Architecture & Mathematical Methodology"):
     st.markdown("""
     ### Hybrid Digital Twin Structural Logic
@@ -230,7 +228,7 @@ with st.expander("View Architecture & Mathematical Methodology"):
     The *Thermodynamic Yield* card monitors the ratio of actual yield against this absolute biological boundary.
     """)
 
-# --- DOWNLOADABLE REPORT ---
+# DOWNLOADABLE REPORT
 st.subheader("Operational Reporting Metrics")
 
 report_data = pd.DataFrame({
