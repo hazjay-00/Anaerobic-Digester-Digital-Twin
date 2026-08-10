@@ -53,17 +53,46 @@ if "optimized_mode" not in st.session_state:
     st.session_state.optimized_mode = False
 
 # SIDEBAR CONTROL DIALS
+# SIDEBAR CONTROL DIALS
 st.sidebar.header("Plant Actuator Valve Knobs")
 
 if st.sidebar.button("Run AI Profit Optimization Engine", use_container_width=True, type="secondary"):
     st.session_state.optimized_mode = not st.session_state.optimized_mode
 
-# Unit Conversions and Labels
+# Dynamic AI Optimization Calculation
 if st.session_state.optimized_mode:
-    st.sidebar.info("AI Automation Active: Knobs locked to peak performance baseline coordinates.")
-    slider_cod = st.sidebar.slider("Incoming Waste Concentration (COD mg/L)", 150, 800, 750, disabled=True)
-    slider_hrt = st.sidebar.slider("Hydraulic Retention Time (HRT days)", 3.3, 20.0, 15.0, step=0.1, disabled=True)
-    slider_temp = st.sidebar.slider("Digester Thermal Core Temperature (°C)", 25, 45, 37, disabled=True)
+    # Run a grid search over operational parameters to maximize daily profit
+    best_profit = -float('inf')
+    best_cod, best_hrt, best_temp = 450.0, 10.0, 37.0
+
+    # Grid search across reasonable operating steps
+    for test_cod in np.linspace(150, 800, 10):
+        for test_hrt in np.linspace(3.3, 20.0, 10):
+            test_d = 1.0 / test_hrt
+            for test_temp in np.linspace(20, 60, 9):
+                # Physics calculation
+                _, _, test_m_final = run_plant_simulation(test_cod, test_d, test_temp)
+                test_methane_nm3 = (test_m_final * 500.0) / 1000.0
+                
+                # ML model prediction for effluent COD check
+                test_input = pd.DataFrame([[test_cod, test_d, test_temp]], 
+                                         columns=['Inflow_COD', 'Dilution_Rate', 'Temperature'])
+                test_effluent = ai_engine.predict(test_input)[0]
+                
+                # Financial calculation
+                test_rev = test_methane_nm3 * 0.80
+                test_cost = max(0.0, (test_temp - 15.0) * 0.45)
+                test_profit = test_rev - test_cost
+                
+                # Ensure regulatory compliance (Effluent COD <= 130 mg/L) while maximizing profit
+                if test_effluent <= 130.0 and test_profit > best_profit:
+                    best_profit = test_profit
+                    best_cod, best_hrt, best_temp = test_cod, test_hrt, test_temp
+
+    st.sidebar.info(f"AI Automation Active: Dynamically calculated parameters for peak profit (${best_profit:.2f}/day).")
+    slider_cod = st.sidebar.slider("Incoming Waste Concentration (COD mg/L)", 150, 800, int(best_cod), disabled=True)
+    slider_hrt = st.sidebar.slider("Hydraulic Retention Time (HRT days)", 3.3, 20.0, round(float(best_hrt), 1), step=0.1, disabled=True)
+    slider_temp = st.sidebar.slider("Digester Thermal Core Temperature (°C)", 20, 60, int(best_temp), disabled=True)
 else:
     slider_cod = st.sidebar.slider("Incoming Waste Concentration (COD mg/L)", 150, 800, 450)
     slider_hrt = st.sidebar.slider("Hydraulic Retention Time (HRT days)", 3.3, 20.0, 6.7, step=0.1)
